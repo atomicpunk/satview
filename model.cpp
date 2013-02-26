@@ -21,7 +21,8 @@
 #include <iostream>
 #include <sstream>
 
-#define EARTH_JPEG "EarthMap_2500x1250.jpg"
+//#define EARTH_JPEG "EarthMap_2500x1250.jpg"
+#define EARTH_JPEG "earth_night.jpg"
 
 Model::Model(ModelType t, const char *filename) :
     type(t)
@@ -155,9 +156,9 @@ void Model::constructEarth()
             float y2 = r*cos(inc0);
             float y3 = r*cos(inc1);
 
-            polygons[idx].facet[0] = x0+x1;
-            polygons[idx].facet[1] = y0+y1;
-            polygons[idx].facet[2] = z0+z1;
+            polygons[idx].facet[0] = (x0+x1)*4;
+            polygons[idx].facet[1] = (y0+y1)*4;
+            polygons[idx].facet[2] = (z0+z1)*4;
 
             polygons[idx].vertex[0][0] = x0;
             polygons[idx].vertex[1][0] = x1;
