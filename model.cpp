@@ -174,10 +174,10 @@ void Model::constructEarth()
             polygons[idx].vertex[2][2] = z3;
             polygons[idx].vertex[3][2] = z2;
 
-            polygons[idx].tex[0][0] = ((float)i/360);
-            polygons[idx].tex[1][0] = ((float)i/360);
-            polygons[idx].tex[2][0] = ((float)(i+1)/360);
-            polygons[idx].tex[3][0] = ((float)(i+1)/360);
+            polygons[idx].tex[0][0] = 1-((float)i/360);
+            polygons[idx].tex[1][0] = 1-((float)i/360);
+            polygons[idx].tex[2][0] = 1-((float)(i+1)/360);
+            polygons[idx].tex[3][0] = 1-((float)(i+1)/360);
 
             polygons[idx].tex[0][1] = ((float)j/180);
             polygons[idx].tex[1][1] = ((float)(j+1)/180);
