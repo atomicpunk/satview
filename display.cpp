@@ -101,8 +101,9 @@ Display::~Display()
 
 void Display::draw()
 {
-    if(!redraw || paused)
-        return;
+//    if(!redraw || paused)
+//        return;
+    rotation[1] += 0.1;
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
