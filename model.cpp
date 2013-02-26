@@ -46,15 +46,10 @@ Model::~Model()
 {
     if(polygons)
         delete polygons;
-    if(earthtexture.buffer)
-        delete earthtexture.buffer;
 }
 
-bool Model::loadJpeg(const char* filename, Texture *tex)
+bool Model::loadJpeg(const char* filename, unsigned int *tex)
 {
-    if(tex->buffer != NULL)
-        return false;
-
     unsigned char a,r,g,b;
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -73,25 +68,25 @@ bool Model::loadJpeg(const char* filename, Texture *tex)
     jpeg_stdio_src(&cinfo, jfp);
     (void) jpeg_read_header(&cinfo, TRUE);
     (void) jpeg_start_decompress(&cinfo);
-    tex->width = cinfo.output_width;
-    tex->height = cinfo.output_height;
+    int width = cinfo.output_width;
+    int height = cinfo.output_height;
 
-    tex->buffer = new GLubyte [(tex->width)*(tex->height)*4];
-    GLubyte * pDummy = tex->buffer;
+    unsigned char *buffer = new GLubyte [(width)*(height)*4];
+    GLubyte * pDummy = buffer;
 
     if (!pDummy)
     {
         printf("NO MEM FOR JPEG CONVERT!\n");
         return false;
     }
-    row_stride = tex->width * cinfo.output_components;
+    row_stride = width * cinfo.output_components;
     pJpegBuffer = (*cinfo.mem->alloc_sarray)
     ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 
     while (cinfo.output_scanline < cinfo.output_height)
     {
         (void) jpeg_read_scanlines(&cinfo, pJpegBuffer, 1);
-        for (int x=0;x<(tex->width);x++)
+        for (int x=0;x<(width);x++)
         {
             a = 0; // alpha value is not supported on jpg
             r = pJpegBuffer[0][cinfo.output_components*x];
@@ -114,31 +109,82 @@ bool Model::loadJpeg(const char* filename, Texture *tex)
     jpeg_destroy_decompress(&cinfo);
 
     GLuint texid;
-    glGenTextures(1, &texid);
-    tex->id = texid;
-    printf("SIZE=%dx%d, ID=%d\n", tex->width, tex->height, tex->id);
+    glGenTextures(1, tex);
+    printf("SIZE=%dx%d, ID=%d\n", width, height, *tex);
 
-    glBindTexture(GL_TEXTURE_2D, tex->id);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, tex->width, tex->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex->buffer);
+    glBindTexture(GL_TEXTURE_2D, *tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 //    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 //    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 //    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 
+    delete buffer;
     return true;
 }
 
 void Model::constructEarth()
 {
+    polygon_count = 360*180;
+    polygons = new Polygon[polygon_count];
+    int idx = 0;
+
     loadJpeg(EARTH_JPEG, &earthtexture);
-    for(int i = 0; i < 360-1; i++)
-        for(int j = 0; j < 180-1; j++)
+    float r = 0.5;
+    for(int i = 0; i < 360; i++)
+        for(int j = 0; j < 180; j++)
         {
-            float lon0 = ((float)i/180.0)*M_PI;
-            float lon1 = ((float)(i+1)/180.0)*M_PI;
-            float lat0 = ((float)j/180.0)*M_PI;
-            float lat1 = ((float)(j+1)/180.0)*M_PI;
+            float azi0 = ((float)i/180.0)*M_PI;
+            float azi1 = ((float)(i+1)/180.0)*M_PI;
+            float inc0 = ((float)j/180.0)*M_PI;
+            float inc1 = ((float)(j+1)/180.0)*M_PI;
+
+            float x0 = r*sin(inc0)*cos(azi0);
+            float x1 = r*sin(inc1)*cos(azi0);
+            float x2 = r*sin(inc0)*cos(azi1);
+            float x3 = r*sin(inc1)*cos(azi1);
+
+            float z0 = r*sin(inc0)*sin(azi0);
+            float z1 = r*sin(inc1)*sin(azi0);
+            float z2 = r*sin(inc0)*sin(azi1);
+            float z3 = r*sin(inc1)*sin(azi1);
+
+            float y0 = r*cos(inc0);
+            float y1 = r*cos(inc1);
+            float y2 = r*cos(inc0);
+            float y3 = r*cos(inc1);
+
+            polygons[idx].facet[0] = x0+x1;
+            polygons[idx].facet[1] = y0+y1;
+            polygons[idx].facet[2] = z0+z1;
+
+            polygons[idx].vertex[0][0] = x0;
+            polygons[idx].vertex[1][0] = x1;
+            polygons[idx].vertex[2][0] = x3;
+            polygons[idx].vertex[3][0] = x2;
+
+            polygons[idx].vertex[0][1] = y0;
+            polygons[idx].vertex[1][1] = y1;
+            polygons[idx].vertex[2][1] = y3;
+            polygons[idx].vertex[3][1] = y2;
+
+            polygons[idx].vertex[0][2] = z0;
+            polygons[idx].vertex[1][2] = z1;
+            polygons[idx].vertex[2][2] = z3;
+            polygons[idx].vertex[3][2] = z2;
+
+            polygons[idx].tex[0][0] = ((float)i/360);
+            polygons[idx].tex[1][0] = ((float)i/360);
+            polygons[idx].tex[2][0] = ((float)(i+1)/360);
+            polygons[idx].tex[3][0] = ((float)(i+1)/360);
+
+            polygons[idx].tex[0][1] = ((float)j/180);
+            polygons[idx].tex[1][1] = ((float)(j+1)/180);
+            polygons[idx].tex[2][1] = ((float)(j+1)/180);
+            polygons[idx].tex[3][1] = ((float)j/180);
+
+            idx++;
         }
 }
 
@@ -292,6 +338,7 @@ void Model::draw()
         glNormal3f(polygons[i].facet[0], polygons[i].facet[1], polygons[i].facet[2]);
         for(int j = 0; j < sides; j++)
         {
+            glTexCoord2f(polygons[i].tex[j][0], polygons[i].tex[j][1]);
             glVertex3f(polygons[i].vertex[j][0]*scale,
                        polygons[i].vertex[j][1]*scale,
                        polygons[i].vertex[j][2]*scale);

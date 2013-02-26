@@ -17,7 +17,8 @@ public:
     Polygon() {};
     ~Polygon() {};
     float facet[3];
-    float vertex[3][3];
+    float vertex[4][3];
+    float tex[4][2];
 };
 
 class Texture {
@@ -48,7 +49,7 @@ public:
     ModelType type;
 private:
     bool loadSTL(const char* filename);
-    bool loadJpeg(const char* filename, Texture *tex);
+    bool loadJpeg(const char* filename, unsigned int *tex);
     void constructEarth();
     void centerObject();
     void calculateInitialScale();
@@ -57,7 +58,7 @@ private:
     float axismax[3];
     int polygon_count;
     Polygon *polygons;
-    Texture earthtexture;
+    unsigned int earthtexture;
 };
 
 #endif //MODEL_H

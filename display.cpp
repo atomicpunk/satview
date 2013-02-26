@@ -17,7 +17,7 @@
 #define RPIX(c, n) ((((c)>>2)&0x1)?(n):0)
 #define GPIX(c, n) ((((c)>>1)&0x1)?(n):0)
 #define BPIX(c, n) (((c)&0x1)?(n):0)
-#define MODELFILE "spaceshuttle.stl"
+//#define MODELFILE "spaceshuttle.stl"
 //#define MODELFILE "VESTA.STL"
 //#define MODELFILE "Earth2.stl"
 
@@ -91,7 +91,6 @@ Display::Display()
 #else
     modelearth = new Model(Model::EARTH);
 #endif
-
     redraw = true;
 }
 
