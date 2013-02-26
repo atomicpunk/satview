@@ -1,0 +1,51 @@
+AC_INIT([satview], [1.0.0], [])
+AM_INIT_AUTOMAKE(satview, 1.0.0)
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_HEADERS([config.h])
+
+AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[Debug (default=no)])],
+		[use_debug=yes],[use_debug=no])
+
+AC_ISC_POSIX
+AC_PROG_CC
+AC_STDC_HEADERS
+AC_LANG_CPLUSPLUS
+AC_LANG_COMPILER_REQUIRE
+
+if test "x${use_debug}" = "xyes"
+then
+	CFLAGS="$CFLAGS -ggdb -O0 -DDEBUG"
+else
+	CFLAGS="-g"
+fi
+
+changequote(,)dnl
+if test "x$GCC" = "xyes"; then
+  case " $CFLAGS " in
+  *[\ \	]-Wall[\ \	]*) ;;
+  *) CFLAGS="$CFLAGS -Wall" ;;
+  esac
+fi
+changequote([,])dnl
+
+PKG_CHECK_MODULES(GLIB, glib-2.0)
+AC_SUBST(GLIB_CFLAGS)
+AC_SUBST(GLIB_LIBS)
+
+PKG_CHECK_MODULES(GLU, glu)
+AC_SUBST(GLU_CFLAGS)
+AC_SUBST(GLU_LIBS)
+
+AC_CHECK_LIB([glut], [glutInit])
+
+JPEG_CFLAGS=""
+JPEG_LIBS="-L/usr/lib/i386-linux-gnu -ljpeg"
+AC_SUBST(JPEG_CFLAGS)
+AC_SUBST(JPEG_LIBS)
+
+AC_CONFIG_FILES([
+Makefile
+])
+
+AC_OUTPUT
+
