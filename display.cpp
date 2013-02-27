@@ -48,8 +48,11 @@ Display::Display()
     rotation[1] = 0;
     winWidth = 1280;
     winHeight = 720;
-    light_sun = new LightSource(10.0, 0.0, 0.0, 0.0);
-    light_stars = new LightSource(-10.0, 0.0, 0.0, 0.0);
+//    azimuth = 0;
+//    inclination = 23.5*M_PI/180.0;
+    azimuth = M_PI/2;
+    inclination = 0;
+    light_sun.orient(azimuth, inclination);
 
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(winWidth, winHeight);
@@ -78,13 +81,13 @@ Display::Display()
 
     glMatrixMode(GL_MODELVIEW);
     glEnable(GL_LIGHTING);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_sun->position);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light_sun->ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_sun->diffuse);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_sun.frontpos);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_sun.ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_sun.diffuse);
     glEnable (GL_LIGHT0);
-    glLightfv(GL_LIGHT1, GL_POSITION, light_stars->position);
-    glLightfv(GL_LIGHT1, GL_AMBIENT, light_stars->ambient);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_stars->diffuse);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_sun.backpos);
+    glLightfv(GL_LIGHT1, GL_AMBIENT, light_sun.ambient);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_sun.diffuse);
     glEnable (GL_LIGHT1);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -92,6 +95,7 @@ Display::Display()
     modelearth = new Model(Model::STLFILE, MODELFILE);
 #else
     modelearth = new Model(Model::EARTH);
+    modelearth->orient(azimuth, inclination);
 #endif
     redraw = true;
 }
@@ -99,8 +103,6 @@ Display::Display()
 Display::~Display()
 {
     glutDestroyWindow(window);
-    delete light_sun;
-    delete light_stars;
 }
 
 void Display::draw()
@@ -124,8 +126,8 @@ void Display::draw()
         glRotatef(rotation[0], 1.0, 0.0, 0.0);
         glRotatef(rotation[1], 0.0, 1.0, 0.0);
     }
-    glLightfv(GL_LIGHT0, GL_POSITION, light_sun->position);
-    glLightfv(GL_LIGHT1, GL_POSITION, light_stars->position);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_sun.frontpos);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_sun.backpos);
     modelearth->draw();
     glutSwapBuffers();
     redraw = false;
@@ -275,15 +277,10 @@ void Display::create()
         display = new Display();
 }
 
-LightSource::LightSource(float x, float y, float z, float w)
+LightSource::LightSource()
 {
-    rotation[0] = 0;
-    rotation[1] = 0;
-
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
-    position[3] = w;
+    frontpos[3] = backpos[3] = 0;
+    orient(0, 0);
 
     ambient[4] = 1.0;
     for(int i = 0; i < 3; i++)
@@ -294,8 +291,14 @@ LightSource::LightSource(float x, float y, float z, float w)
         diffuse[i] = 2.0;
 };
 
-void LightSource::rotate(float x, float y)
+void LightSource::orient(float azi, float inc)
 {
+    frontpos[0] = 10.0*cos(azi);
+    frontpos[2] = 10.0*sin(azi);
+    frontpos[1] = 10.0*tan(inc);
 
+    backpos[0] = -1*frontpos[0];
+    backpos[2] = -1*frontpos[2];
+    backpos[1] = -1*frontpos[1];
 }
 

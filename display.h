@@ -35,15 +35,15 @@ public:
 
 class LightSource {
 public:
-    LightSource(float x, float y, float z, float w);
+    LightSource();
     ~LightSource() {};
 
-    void rotate(float x, float y);
-
-    float rotation[2];
-    float position[4];
+    float frontpos[4];
+    float backpos[4];
     float ambient[4];
     float diffuse[4];
+
+    void orient(float azi, float inc);
 };
 
 class Display {
@@ -64,8 +64,9 @@ public:
     Model *modelearth;
 
 private:
-    LightSource *light_sun;
-    LightSource *light_stars;
+    float azimuth;
+    float inclination;
+    LightSource light_sun;
     int window;
     float rotation[2];
     void drawPolygon(float, float, float,

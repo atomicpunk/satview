@@ -19,19 +19,9 @@ public:
     float facet[3];
     float vertex[4][3];
     float tex[4][2];
-};
-
-class Texture {
-public:
-    Texture() {
-        height=width=id=0;
-        buffer=NULL;
-    };
-    ~Texture() {};
-    unsigned int id;
-    unsigned char *buffer;
-    int height;
-    int width;
+    float azi;
+    float inc;
+    unsigned int texid;
 };
 
 class Model {
@@ -44,6 +34,7 @@ public:
     Model(ModelType t, const char* filename=NULL);
     ~Model();
 
+    void orient(float azi, float inc);
     void draw();
     void userInput(char ch);
     float scale;

@@ -158,6 +158,9 @@ void Model::constructEarth()
             float y2 = r*cos(inc0);
             float y3 = r*cos(inc1);
 
+            polygons[idx].inc = (M_PI/2) - ((inc0 + inc1)/2);
+            polygons[idx].azi = (azi0 + azi1)/2;
+
             polygons[idx].facet[0] = (x0+x1)*4;
             polygons[idx].facet[1] = (y0+y1)*4;
             polygons[idx].facet[2] = (z0+z1)*4;
@@ -186,6 +189,8 @@ void Model::constructEarth()
             polygons[idx].tex[1][1] = ((float)(j+1)/180);
             polygons[idx].tex[2][1] = ((float)(j+1)/180);
             polygons[idx].tex[3][1] = ((float)j/180);
+
+            polygons[idx].texid = earth_day;
 
             idx++;
         }
@@ -239,6 +244,7 @@ bool Model::loadSTL(const char *filename)
         {
             parse >> field;
             parse >> polygons[i].facet[0] >> polygons[i].facet[1] >> polygons[i].facet[2];
+            polygons[i].texid = earth_day;
         }
         else if(!field.compare("vertex"))
         {
@@ -335,16 +341,14 @@ void Model::calculateInitialScale()
 void Model::draw()
 {
     int sides = (type == STLFILE)?3:4;
+    int texid = -1;
     for(int i = 0; i < polygon_count; i++)
     {
-        if(i == 0)
-            glBindTexture(GL_TEXTURE_2D, earth_day);
-        else if(i == polygon_count/4)
-            glBindTexture(GL_TEXTURE_2D, earth_night);
-        else if(i == polygon_count/2)
-            glBindTexture(GL_TEXTURE_2D, earth_night);
-        else if(i == polygon_count*3/4)
-            glBindTexture(GL_TEXTURE_2D, earth_day);
+        if(texid != polygons[i].texid)
+        {
+            texid = polygons[i].texid;
+            glBindTexture(GL_TEXTURE_2D, texid);
+        }
 
         glBegin((sides == 3)?GL_TRIANGLES:GL_POLYGON);
         glNormal3f(polygons[i].facet[0], polygons[i].facet[1], polygons[i].facet[2]);
@@ -356,6 +360,17 @@ void Model::draw()
                        polygons[i].vertex[j][2]*scale);
         }
         glEnd();
+    }
+}
+
+void Model::orient(float azi, float inc)
+{
+    for(int i = 0; i < polygon_count; i++)
+    {
+        if(i < polygon_count/2)
+            polygons[i].texid = earth_day;
+        else
+            polygons[i].texid = earth_night;
     }
 }
 
