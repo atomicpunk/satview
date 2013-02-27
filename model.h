@@ -45,6 +45,7 @@ public:
     ~Model();
 
     void draw();
+    void userInput(char ch);
     float scale;
     ModelType type;
 private:
@@ -58,7 +59,8 @@ private:
     float axismax[3];
     int polygon_count;
     Polygon *polygons;
-    unsigned int earthtexture;
+    unsigned int earth_day;
+    unsigned int earth_night;
 };
 
 #endif //MODEL_H

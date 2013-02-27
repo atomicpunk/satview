@@ -40,10 +40,6 @@ static void mouseMove(int, int);
 static void drawScreen();
 static void reshapeScreen(int, int);
 
-float lighting_ambient[] =  { 0.1, 0.1, 0.1, 1.0 };
-float lighting_diffuse[] =  { 1.2, 1.2, 1.2, 1.0 };
-float lighting_position[] = { 2.0, 2.0, 0.0, 1.0 };
-
 Display::Display()
 {
     paused = false;
@@ -52,6 +48,8 @@ Display::Display()
     rotation[1] = 0;
     winWidth = 1280;
     winHeight = 720;
+    light_sun = new LightSource(10.0, 0.0, 0.0, 0.0);
+    light_stars = new LightSource(-10.0, 0.0, 0.0, 0.0);
 
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(winWidth, winHeight);
@@ -80,10 +78,14 @@ Display::Display()
 
     glMatrixMode(GL_MODELVIEW);
     glEnable(GL_LIGHTING);
-    glLightfv(GL_LIGHT0, GL_POSITION, lighting_position);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, lighting_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lighting_diffuse); 
+    glLightfv(GL_LIGHT0, GL_POSITION, light_sun->position);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_sun->ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_sun->diffuse);
     glEnable (GL_LIGHT0);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_stars->position);
+    glLightfv(GL_LIGHT1, GL_AMBIENT, light_stars->ambient);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_stars->diffuse);
+    glEnable (GL_LIGHT1);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 #ifdef MODELFILE
@@ -96,14 +98,15 @@ Display::Display()
 
 Display::~Display()
 {
-    glutDestroyWindow(window); 
+    glutDestroyWindow(window);
+    delete light_sun;
+    delete light_stars;
 }
 
 void Display::draw()
 {
-//    if(!redraw || paused)
-//        return;
-    rotation[1] += 0.1;
+    if(!redraw || paused)
+        return;
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
@@ -121,6 +124,8 @@ void Display::draw()
         glRotatef(rotation[0], 1.0, 0.0, 0.0);
         glRotatef(rotation[1], 0.0, 1.0, 0.0);
     }
+    glLightfv(GL_LIGHT0, GL_POSITION, light_sun->position);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_stars->position);
     modelearth->draw();
     glutSwapBuffers();
     redraw = false;
@@ -172,6 +177,7 @@ static void keyPress(unsigned char key, int x, int y)
 
     switch(key) {
     case 'p': display->paused = !display->paused; break;
+    case 'e': display->modelearth->userInput('e'); break;
     case 'g': primary_color = GREEN; break;
     case 'b': primary_color = BLUE; break;
     case 'm': primary_color = MAGENTA; break;
@@ -268,3 +274,28 @@ void Display::create()
     if(display == NULL)
         display = new Display();
 }
+
+LightSource::LightSource(float x, float y, float z, float w)
+{
+    rotation[0] = 0;
+    rotation[1] = 0;
+
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
+    position[3] = w;
+
+    ambient[4] = 1.0;
+    for(int i = 0; i < 3; i++)
+        ambient[i] = 0.0;
+
+    diffuse[4] = 1.0;
+    for(int i = 0; i < 3; i++)
+        diffuse[i] = 2.0;
+};
+
+void LightSource::rotate(float x, float y)
+{
+
+}
+

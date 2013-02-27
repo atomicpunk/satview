@@ -21,9 +21,9 @@
 #include <iostream>
 #include <sstream>
 
-//#define EARTH_JPEG "EarthMap_2500x1250.jpg"
+#define EARTH_DAY_JPEG "EarthMap_2500x1250.jpg"
 //#define EARTH_JPEG "earth_night.jpg"
-#define EARTH_JPEG "earth_bright_night.jpg"
+#define EARTH_NIGHT_JPEG "earth_bright_night.jpg"
 
 Model::Model(ModelType t, const char *filename) :
     type(t)
@@ -132,7 +132,8 @@ void Model::constructEarth()
     polygons = new Polygon[polygon_count];
     int idx = 0;
 
-    loadJpeg(EARTH_JPEG, &earthtexture);
+    loadJpeg(EARTH_DAY_JPEG, &earth_day);
+    loadJpeg(EARTH_NIGHT_JPEG, &earth_night);
     float r = 0.5;
     for(int i = 0; i < 360; i++)
         for(int j = 0; j < 180; j++)
@@ -336,6 +337,15 @@ void Model::draw()
     int sides = (type == STLFILE)?3:4;
     for(int i = 0; i < polygon_count; i++)
     {
+        if(i == 0)
+            glBindTexture(GL_TEXTURE_2D, earth_day);
+        else if(i == polygon_count/4)
+            glBindTexture(GL_TEXTURE_2D, earth_night);
+        else if(i == polygon_count/2)
+            glBindTexture(GL_TEXTURE_2D, earth_night);
+        else if(i == polygon_count*3/4)
+            glBindTexture(GL_TEXTURE_2D, earth_day);
+
         glBegin((sides == 3)?GL_TRIANGLES:GL_POLYGON);
         glNormal3f(polygons[i].facet[0], polygons[i].facet[1], polygons[i].facet[2]);
         for(int j = 0; j < sides; j++)
@@ -347,4 +357,9 @@ void Model::draw()
         }
         glEnd();
     }
+}
+
+void Model::userInput(char ch)
+{
+
 }

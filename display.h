@@ -33,6 +33,19 @@ public:
     int dy;
 };
 
+class LightSource {
+public:
+    LightSource(float x, float y, float z, float w);
+    ~LightSource() {};
+
+    void rotate(float x, float y);
+
+    float rotation[2];
+    float position[4];
+    float ambient[4];
+    float diffuse[4];
+};
+
 class Display {
 public:
     Display();
@@ -48,11 +61,13 @@ public:
     bool redraw;
     float winWidth;
     float winHeight;
+    Model *modelearth;
 
 private:
+    LightSource *light_sun;
+    LightSource *light_stars;
     int window;
     float rotation[2];
-    Model *modelearth;
     void drawPolygon(float, float, float,
          float, float, float, float, float, float);
 };
