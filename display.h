@@ -44,6 +44,7 @@ public:
     float diffuse[4];
 
     void orient(float azi, float inc);
+    void orientnow();
 };
 
 class Display {

@@ -20,16 +20,6 @@
 #define WINDOW_Y 0
 #define LINESIZE 1
 
-// colors
-#define BLACK           0
-#define BLUE            1
-#define GREEN           2
-#define CYAN            3
-#define RED             4
-#define MAGENTA         5
-#define YELLOW          6
-#define WHITE           7
-
 extern int verbose;
 
 #endif //DEFINES_H

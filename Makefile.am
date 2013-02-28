@@ -6,6 +6,7 @@ INCLUDES= \
 bin_PROGRAMS=satview
 
 satview_SOURCES =	\
+        constants.cpp   \
         defines.h       \
         display.h       \
         display.cpp     \

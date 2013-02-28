@@ -12,6 +12,7 @@
 #include "GL/gl.h"
 #include "GL/glext.h"
 #include <math.h>
+#include <glib.h>
 
 #define LINEY (((float)(LINESIZE)/(float)WINDOW_HEIGHT)-1.0)
 #define RPIX(c, n) ((((c)>>2)&0x1)?(n):0)
@@ -20,6 +21,7 @@
 //#define MODELFILE "spaceshuttle.stl"
 //#define MODELFILE "VESTA.STL"
 //#define MODELFILE "Earth2.stl"
+extern float sundec[366];
 
 enum {
     MOUSE_LEFT = 0,
@@ -31,8 +33,6 @@ enum {
 
 Display *display = NULL;
 MouseState mousestate;
-unsigned char primary_color = GREEN;
-unsigned char highlight_color = RED;
 
 static void keyPress(unsigned char, int, int);
 static void mousePress(int, int, int, int);
@@ -48,11 +48,7 @@ Display::Display()
     rotation[1] = 0;
     winWidth = 1280;
     winHeight = 720;
-//    azimuth = 0;
-//    inclination = 23.5*M_PI/180.0;
-    azimuth = M_PI/2;
-    inclination = 0;
-    light_sun.orient(azimuth, inclination);
+    light_sun.orientnow();
 
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowSize(winWidth, winHeight);
@@ -95,7 +91,9 @@ Display::Display()
     modelearth = new Model(Model::STLFILE, MODELFILE);
 #else
     modelearth = new Model(Model::EARTH);
-    modelearth->orient(azimuth, inclination);
+    modelearth->orient(light_sun.frontpos[0],
+                       light_sun.frontpos[1],
+                       light_sun.frontpos[2]);
 #endif
     redraw = true;
 }
@@ -180,20 +178,6 @@ static void keyPress(unsigned char key, int x, int y)
     switch(key) {
     case 'p': display->paused = !display->paused; break;
     case 'e': display->modelearth->userInput('e'); break;
-    case 'g': primary_color = GREEN; break;
-    case 'b': primary_color = BLUE; break;
-    case 'm': primary_color = MAGENTA; break;
-    case 'w': primary_color = WHITE; break;
-    case 'c': primary_color = CYAN; break;
-    case 'r': primary_color = RED; break;
-    case 'y': primary_color = YELLOW; break;
-    case 'G': highlight_color = GREEN; break;
-    case 'B': highlight_color = BLUE; break;
-    case 'M': highlight_color = MAGENTA; break;
-    case 'W': highlight_color = WHITE; break;
-    case 'C': highlight_color = CYAN; break;
-    case 'R': highlight_color = RED; break;
-    case 'Y': highlight_color = YELLOW; break;
     case 'q': exit(0); break;
     default:
         if(verbose)
@@ -302,3 +286,10 @@ void LightSource::orient(float azi, float inc)
     backpos[1] = -1*frontpos[1];
 }
 
+void LightSource::orientnow()
+{
+    time_t ct = time(NULL);
+    struct tm *t = gmtime(&ct);
+    float inc = sundec[t->tm_yday]*M_PI/180;
+    orient(0, inc);
+}

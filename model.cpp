@@ -158,9 +158,6 @@ void Model::constructEarth()
             float y2 = r*cos(inc0);
             float y3 = r*cos(inc1);
 
-            polygons[idx].inc = (M_PI/2) - ((inc0 + inc1)/2);
-            polygons[idx].azi = (azi0 + azi1)/2;
-
             polygons[idx].facet[0] = (x0+x1)*4;
             polygons[idx].facet[1] = (y0+y1)*4;
             polygons[idx].facet[2] = (z0+z1)*4;
@@ -363,11 +360,25 @@ void Model::draw()
     }
 }
 
-void Model::orient(float azi, float inc)
+float Model::vectorAngle(float x1, float y1, float z1,
+                         float x2, float y2, float z2)
+{
+    float dotp = x1*x2 + y1*y2 + z1*z2;
+    float mag1 = sqrt(x1*x1 + y1*y1 + z1*z1);
+    float mag2 = sqrt(x2*x2 + y2*y2 + z2*z2);
+    return acos(dotp / (mag1 * mag2));
+}
+
+void Model::orient(float x, float y, float z)
 {
     for(int i = 0; i < polygon_count; i++)
     {
-        if(i < polygon_count/2)
+        float a = vectorAngle(x, y, z,
+            polygons[i].facet[0],
+            polygons[i].facet[1],
+            polygons[i].facet[2]);
+
+        if(a < M_PI/2)
             polygons[i].texid = earth_day;
         else
             polygons[i].texid = earth_night;

@@ -19,8 +19,6 @@ public:
     float facet[3];
     float vertex[4][3];
     float tex[4][2];
-    float azi;
-    float inc;
     unsigned int texid;
 };
 
@@ -34,7 +32,7 @@ public:
     Model(ModelType t, const char* filename=NULL);
     ~Model();
 
-    void orient(float azi, float inc);
+    void orient(float x, float y, float z);
     void draw();
     void userInput(char ch);
     float scale;
@@ -52,6 +50,8 @@ private:
     Polygon *polygons;
     unsigned int earth_day;
     unsigned int earth_night;
+    float vectorAngle(float x1, float y1, float z1,
+                      float x2, float y2, float z2);
 };
 
 #endif //MODEL_H
