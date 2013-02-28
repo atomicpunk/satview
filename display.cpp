@@ -105,6 +105,9 @@ Display::~Display()
 
 void Display::draw()
 {
+    if(light_sun.orientnow())
+        redraw = true;
+
     if(!redraw || paused)
         return;
 
@@ -264,6 +267,7 @@ void Display::create()
 LightSource::LightSource()
 {
     frontpos[3] = backpos[3] = 0;
+    azimuth = 1;
     orient(0, 0);
 
     ambient[4] = 1.0;
@@ -275,8 +279,14 @@ LightSource::LightSource()
         diffuse[i] = 2.0;
 };
 
-void LightSource::orient(float azi, float inc)
+bool LightSource::orient(float azi, float inc)
 {
+    if((azi == azimuth)&&(inc == inclination))
+        return false;
+
+    azimuth = azi;
+    inclination = inc;
+
     frontpos[0] = 10.0*cos(azi);
     frontpos[2] = 10.0*sin(azi);
     frontpos[1] = 10.0*tan(inc);
@@ -284,12 +294,15 @@ void LightSource::orient(float azi, float inc)
     backpos[0] = -1*frontpos[0];
     backpos[2] = -1*frontpos[2];
     backpos[1] = -1*frontpos[1];
+
+    return true;
 }
 
-void LightSource::orientnow()
+bool LightSource::orientnow()
 {
     time_t ct = time(NULL);
     struct tm *t = gmtime(&ct);
     float inc = sundec[t->tm_yday]*M_PI/180;
-    orient(0, inc);
+    float azi = ((float)(60*t->tm_hour+t->tm_min)/1440)*2.0*M_PI;
+    return orient(azi, inc);
 }

@@ -43,8 +43,10 @@ public:
     float ambient[4];
     float diffuse[4];
 
-    void orient(float azi, float inc);
-    void orientnow();
+    float azimuth;
+    float inclination;
+    bool orient(float azi, float inc);
+    bool orientnow();
 };
 
 class Display {

@@ -21,8 +21,7 @@
 #include <iostream>
 #include <sstream>
 
-#define EARTH_DAY_JPEG "EarthMap_2500x1250.jpg"
-//#define EARTH_JPEG "earth_night.jpg"
+#define EARTH_DAY_JPEG "earth_day_mid.jpg"
 #define EARTH_NIGHT_JPEG "earth_bright_night.jpg"
 
 Model::Model(ModelType t, const char *filename) :
